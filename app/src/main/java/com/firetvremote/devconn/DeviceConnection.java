@@ -1,5 +1,7 @@
 package com.firetvremote.devconn;
 
+import androidx.annotation.NonNull;
+
 import com.cgutman.adblib.AdbConnection;
 import com.cgutman.adblib.AdbCrypto;
 import com.cgutman.adblib.AdbStream;
@@ -7,17 +9,17 @@ import com.firetvremote.AdbUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DeviceConnection implements Closeable {
 	private static final int CONN_TIMEOUT = 5000;
 
-	private String host;
-	private int port;
-	private DeviceConnectionListener listener;
+	private final String host;
+	private final int port;
+	private final DeviceConnectionListener listener;
 	
 	private AdbConnection connection;
 	private AdbStream shellStream;
@@ -25,7 +27,7 @@ public class DeviceConnection implements Closeable {
 	private boolean closed;
 	private boolean foreground;
 	
-	private LinkedBlockingQueue<byte[]> commandQueue = new LinkedBlockingQueue<byte[]>();
+	private final LinkedBlockingQueue<byte[]> commandQueue = new LinkedBlockingQueue<byte[]>();
 	
 	public DeviceConnection(DeviceConnectionListener listener, String host, int port) {
 		this.host = host;
@@ -42,85 +44,69 @@ public class DeviceConnection implements Closeable {
 		return port;
 	}
 	
-	public boolean queueCommand(String command) {
-		try {
-			/* Queue it up for sending to the device */
-			commandQueue.add(command.getBytes("UTF-8"));
-			return true;
-		} catch (UnsupportedEncodingException e) {
-			return false;
-		}
-	}
-	
-	public boolean queueBytes(byte[] buffer) {
-		/* Queue it up for sending to the device */
-		commandQueue.add(buffer);
-		return true;
-	}
+	public boolean queueCommand(@NonNull String command) {
+        /* Queue it up for sending to the device */
+        commandQueue.add(command.getBytes(StandardCharsets.UTF_8));
+        return true;
+    }
 	
 	public void startConnect() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				boolean connected = false;
-				Socket socket = new Socket();
-				AdbCrypto crypto;
-				
-				/* Load the crypto config */
-				crypto = listener.loadAdbCrypto(DeviceConnection.this);
-				if (crypto == null) {
-					return;
-				}
-				
-				try {
-					/* Establish a connect to the remote host */
-					socket.connect(new InetSocketAddress(host, port), CONN_TIMEOUT);
-				} catch (IOException e) {
-					listener.notifyConnectionFailed(DeviceConnection.this, e);
-					return;
-				}
+		new Thread(() -> {
+            boolean connected = false;
+            Socket socket = new Socket();
+            AdbCrypto crypto;
 
-				try {
-					/* Establish the application layer connection */
-					connection = AdbConnection.create(socket, crypto);
-					connection.connect();
-					
-					/* Open the shell stream */
-					shellStream = connection.open("shell:");
-					connected = true;
-				} catch (IOException e) {
-					listener.notifyConnectionFailed(DeviceConnection.this, e);
-				} catch (InterruptedException e) {
-					listener.notifyConnectionFailed(DeviceConnection.this, e);
-				} finally {
-					/* Cleanup if the connection failed */
-					if (!connected) {
-						AdbUtils.safeClose(shellStream);
-						
-						/* The AdbConnection object will close the underlying socket
-						 * but we need to close it ourselves if the AdbConnection object
-						 * wasn't successfully constructed.
-						 */
-						if (!AdbUtils.safeClose(connection)) {
-							try {
-								socket.close();
-							} catch (IOException e) {}
-						}
-						
-						return;
-					}
-				}
-				
-				/* Notify the listener that the connection is complete */
-				listener.notifyConnectionEstablished(DeviceConnection.this);
-				
-				/* Start the receive thread */
-				startReceiveThread();
-				
-				/* Enter the blocking send loop */
-				sendLoop();
-			}
-		}).start();
+            /* Load the crypto config */
+            crypto = listener.loadAdbCrypto(DeviceConnection.this);
+            if (crypto == null) {
+                return;
+            }
+
+            try {
+                /* Establish a connect to the remote host */
+                socket.connect(new InetSocketAddress(host, port), CONN_TIMEOUT);
+            } catch (IOException e) {
+                listener.notifyConnectionFailed(DeviceConnection.this, e);
+                return;
+            }
+
+            try {
+                /* Establish the application layer connection */
+                connection = AdbConnection.create(socket, crypto);
+                connection.connect();
+
+                /* Open the shell stream */
+                shellStream = connection.open("shell:");
+                connected = true;
+            } catch (IOException | InterruptedException e) {
+                listener.notifyConnectionFailed(DeviceConnection.this, e);
+            } finally {
+                /* Cleanup if the connection failed */
+                if (!connected) {
+                    AdbUtils.safeClose(shellStream);
+
+                    /* The AdbConnection object will close the underlying socket
+                     * but we need to close it ourselves if the AdbConnection object
+                     * wasn't successfully constructed.
+                     */
+                    if (!AdbUtils.safeClose(connection)) {
+                        try {
+                            socket.close();
+                        } catch (IOException ignored) {}
+                    }
+                    return;
+                }
+            }
+
+            /* Notify the listener that the connection is complete */
+            listener.notifyConnectionEstablished(DeviceConnection.this);
+
+            /* Start the receive thread */
+            startReceiveThread();
+
+            /* Enter the blocking send loop */
+            sendLoop();
+        }).start();
 	}
 	
 	private void sendLoop() {
@@ -141,30 +127,27 @@ public class DeviceConnection implements Closeable {
 			}
 		} catch (IOException e) {
 			listener.notifyStreamFailed(DeviceConnection.this, e);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException ignored) {
 		} finally {
 			AdbUtils.safeClose(DeviceConnection.this);
 		}
 	}
 	
 	private void startReceiveThread() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					while (!shellStream.isClosed()) {
-						byte[] data = shellStream.read();
-						listener.receivedData(DeviceConnection.this, data, 0, data.length);
-					}
-					listener.notifyStreamClosed(DeviceConnection.this);
-				} catch (IOException e) {
-					listener.notifyStreamFailed(DeviceConnection.this, e);
-				} catch (InterruptedException e) {
-				} finally {
-					AdbUtils.safeClose(DeviceConnection.this);
-				}
-			}
-		}).start();
+		new Thread(() -> {
+            try {
+                while (!shellStream.isClosed()) {
+                    byte[] data = shellStream.read();
+                    listener.receivedData(DeviceConnection.this, data, 0, data.length);
+                }
+                listener.notifyStreamClosed(DeviceConnection.this);
+            } catch (IOException e) {
+                listener.notifyStreamFailed(DeviceConnection.this, e);
+            } catch (InterruptedException ignored) {
+            } finally {
+                AdbUtils.safeClose(DeviceConnection.this);
+            }
+        }).start();
 	}
 	
 	public boolean isClosed() {
@@ -172,7 +155,7 @@ public class DeviceConnection implements Closeable {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		if (isClosed()) {
 			return;
 		}

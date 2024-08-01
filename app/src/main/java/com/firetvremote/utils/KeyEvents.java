@@ -1,4 +1,4 @@
-package com.firetvremote.devconn;
+package com.firetvremote.utils;
 
 public class KeyEvents {
     public static int KEYCODE_UNKNOWN = 0;

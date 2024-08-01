@@ -21,11 +21,8 @@ public class AdbUtils {
 		{
 			try {
 				crypto = AdbCrypto.loadAdbKeyPair(new AndroidBase64(), privKey, pubKey);
-			} catch (Exception e) {
-				crypto = null;
-			}
+			} catch (Exception ignored) {}
 		}
-		
 		return crypto;
 	}
 	
@@ -38,10 +35,8 @@ public class AdbUtils {
 		try {
 			crypto = AdbCrypto.generateAdbKeyPair(new AndroidBase64());
 			crypto.saveAdbKeyPair(privKey, pubKey);
-		} catch (Exception e) {
-			crypto = null;
-		}
-		
+		} catch (Exception ignored) {}
+
 		return crypto;
 	}
 	
@@ -56,19 +51,5 @@ public class AdbUtils {
 		}
 		
 		return true;
-	}
-
-	public static void safeAsyncClose(final Closeable c) {
-		if (c == null)
-			return;
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					c.close();
-				} catch (IOException ignored) {}
-			}
-		}).start();
 	}
 }

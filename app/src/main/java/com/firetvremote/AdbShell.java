@@ -9,18 +9,18 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.IBinder;
 import android.widget.Button;
 
-import com.firetvremote.console.CommandHistory;
+import androidx.annotation.NonNull;
+
 import com.firetvremote.devconn.DeviceConnectionListener;
-import com.firetvremote.devconn.KeyEvents;
 import com.firetvremote.service.ShellService;
 import com.firetvremote.ui.Dialog;
 import com.firetvremote.ui.SpinnerDialog;
+import com.firetvremote.utils.RunCommands;
 
 public class AdbShell extends Activity implements DeviceConnectionListener {
 
@@ -37,18 +37,14 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     private ShellService.ShellServiceBinder binder = null;
     private SpinnerDialog connectWaiting = null;
 
-    private CommandHistory commandHistory = null;
-    private StringBuilder commandBuffer = new StringBuilder();
-
     private DeviceConnection connection = null;
+
+    private RunCommands runCommands = null;
 
     private String hostName = null;
     private int port;
 
-    private final static String PREFS_FILE = "AdbCmdHistoryPrefs";
-    private static final int MAX_COMMAND_HISTORY = 15;
-
-    private ServiceConnection serviceConn = new ServiceConnection() {
+    private final ServiceConnection serviceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
             binder = (ShellService.ShellServiceBinder)arg1;
@@ -63,7 +59,7 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         }
     };
 
-    public void onNewIntent(Intent shellIntent) {
+    public void onNewIntent(@NonNull Intent shellIntent) {
         hostName = shellIntent.getStringExtra("IP");
         port = shellIntent.getIntExtra("Port", -1);
         if (hostName == null || port == -1) {
@@ -78,12 +74,7 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
 
         setTitle("ADB Shell - "+hostName+":"+port);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(service);
-        }
-        else {
-            startService(service);
-        }
+        startForegroundService(service);
 
         if (binder == null) {
             /* Bind the service if we're not bound already. After binding, the callback will
@@ -105,85 +96,39 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         setContentView(R.layout.remote_layout);
 
         /* Setup our controls */
-        upButton = (Button) findViewById(R.id.firetv_up);
-        downButton = (Button) findViewById(R.id.firetv_down);
-        leftButton = (Button) findViewById(R.id.firetv_left);
-        rightButton = (Button) findViewById(R.id.firetv_right);
-        okButton = (Button) findViewById(R.id.firetv_ok);
-        volumeUpButton = (Button) findViewById(R.id.firetv_volup);
-        volumeDownButton = (Button) findViewById(R.id.firetv_voldown);
-        volumeMuteButton = (Button) findViewById(R.id.firetv_mute);
+        initializeComponents();
 
-        upButton.setOnClickListener(l -> {
-            upButtonPressed();
-        });
-        downButton.setOnClickListener(l -> {
-            downButtonPressed();
-        });
-        leftButton.setOnClickListener(l -> {
-            leftButtonPressed();
-        });
-        rightButton.setOnClickListener(l -> {
-            rightButtonPressed();
-        });
-        okButton.setOnClickListener(l -> {
-            okButtonPressed();
-        });
-        volumeUpButton.setOnClickListener(l -> {
-            volumeUpButtonPressed();
-        });
-        volumeDownButton.setOnClickListener(l -> {
-            volumeDownButtonPressed();
-        });
-        volumeMuteButton.setOnClickListener(l -> {
-            volumeMuteButtonPressed();
-        });
-
-        commandHistory = CommandHistory.loadCommandHistoryFromPrefs(MAX_COMMAND_HISTORY, this, PREFS_FILE);
         service = new Intent(this, ShellService.class);
         onNewIntent(getIntent());
+
+        runCommands = new RunCommands();
+
+        setupListeners();
     }
 
-    private void upButtonPressed() {
-        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_UP));
+    private void initializeComponents() {
+        upButton = findViewById(R.id.firetv_up);
+        downButton = findViewById(R.id.firetv_down);
+        leftButton = findViewById(R.id.firetv_left);
+        rightButton = findViewById(R.id.firetv_right);
+        okButton = findViewById(R.id.firetv_ok);
+        volumeUpButton = findViewById(R.id.firetv_volup);
+        volumeDownButton = findViewById(R.id.firetv_voldown);
+        volumeMuteButton = findViewById(R.id.firetv_mute);
     }
 
-    private  void downButtonPressed() {
-        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_DOWN));
+    private void setupListeners() {
+        upButton.setOnClickListener(l -> runCommands.upButtonPressed(connection));
+        downButton.setOnClickListener(l -> runCommands.downButtonPressed(connection));
+        leftButton.setOnClickListener(l -> runCommands.leftButtonPressed(connection));
+        rightButton.setOnClickListener(l -> runCommands.rightButtonPressed(connection));
+        okButton.setOnClickListener(l -> runCommands.okButtonPressed(connection));
+        volumeUpButton.setOnClickListener(l -> runCommands.volumeUpButtonPressed(connection));
+        volumeDownButton.setOnClickListener(l -> runCommands.volumeDownButtonPressed(connection));
+        volumeMuteButton.setOnClickListener(l -> runCommands.volumeMuteButtonPressed(connection));
     }
 
-    private void leftButtonPressed() {
-        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_LEFT));
-    }
-
-    private void rightButtonPressed() {
-        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_RIGHT));
-    }
-
-    private void okButtonPressed() {
-        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_CENTER));
-    }
-
-    private void volumeUpButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_VOLUME_UP));
-    }
-
-    private void volumeDownButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_VOLUME_DOWN));
-    }
-
-    private void volumeMuteButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_VOLUME_MUTE));
-    }
-
-    public void runCommand(String cmd) {
-        commandBuffer.append(cmd);
-        commandHistory.add(cmd);
-        commandBuffer.append('\n');
-        connection.queueCommand(commandBuffer.toString());
-        commandBuffer.setLength(0);
-    }
-
+    @NonNull
     private DeviceConnection startConnection(String host, int port) {
         /* Display the connection progress spinner */
         connectWaiting = SpinnerDialog.displayDialog(this, "Connecting to "+hostName+":"+port,
@@ -203,6 +148,7 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         return conn;
     }
 
+    @NonNull
     private DeviceConnection connectOrLookupConnection(String host, int port) {
         DeviceConnection conn = binder.findConnection(host, port);
         if (conn == null) {
@@ -223,7 +169,7 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     }
 
     @Override
-    public void notifyConnectionFailed(DeviceConnection devConn, Exception e) {
+    public void notifyConnectionFailed(DeviceConnection devConn, @NonNull Exception e) {
         connectWaiting.dismiss();
         connectWaiting = null;
 
@@ -231,7 +177,7 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     }
 
     @Override
-    public void notifyStreamFailed(DeviceConnection devConn, Exception e) {
+    public void notifyStreamFailed(DeviceConnection devConn, @NonNull Exception e) {
         Dialog.displayDialog(this, "Connection Terminated", e.getMessage(), true);
     }
 
@@ -254,8 +200,7 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     @Override
     public void receivedData(
         DeviceConnection devConn, byte[] data, int offset, int length
-    ) {
-    }
+    ) {}
 
     @Override
     public boolean isConsole() {
@@ -263,7 +208,5 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     }
 
     @Override
-    public void consoleUpdated(DeviceConnection devConn, ConsoleBuffer console) {
-
-    }
+    public void consoleUpdated(DeviceConnection devConn, ConsoleBuffer console) {}
 }

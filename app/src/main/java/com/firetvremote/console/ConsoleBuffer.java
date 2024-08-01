@@ -1,6 +1,5 @@
 package com.firetvremote.console;
 
-import android.widget.TextView;
 
 public class ConsoleBuffer {
 	private char[] buffer;
@@ -30,10 +29,5 @@ public class ConsoleBuffer {
 		{
 			buffer[amountPopulated++] = (char)asciiData[offset+i];
 		}
-	}
-	
-	public synchronized void updateTextView(TextView textView)
-	{
-		textView.setText(buffer, 0, amountPopulated);
 	}
 }

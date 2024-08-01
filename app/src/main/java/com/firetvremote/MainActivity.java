@@ -3,7 +3,6 @@ package com.firetvremote;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -19,13 +18,13 @@ import com.firetvremote.ui.SpinnerDialog;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button connectButton = null;
-    private EditText ipField = null;
-    private EditText portField = null;
+    public Button connectButton = null;
+    public EditText ipField = null;
+    public EditText portField = null;
 
-    private SpinnerDialog keygenSpinner;
+    public SpinnerDialog keygenSpinner;
 
-    private final static String PREFS_FILE = "AdbConnectPrefs";
+    public final static String PREFS_FILE = "AdbConnectPrefs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +37,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        ipField = (EditText) findViewById(R.id.ipAddressField);
-        portField = (EditText) findViewById(R.id.portField);
-
-        connectButton = (Button) findViewById(R.id.connect);
-        connectButton.setOnClickListener(l -> {
-            connect();
-        });
+        /* Setup our controls */
+        initializeComponents();
+        setupListeners();
 
         loadPreferences();
 
@@ -56,44 +51,51 @@ public class MainActivity extends AppCompatActivity {
                     "This will only be done once.",
                     true);
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    AdbCrypto crypto;
+            new Thread(() -> {
+                AdbCrypto crypto1;
 
-                    crypto = AdbUtils.writeNewCryptoConfig(getFilesDir());
-                    keygenSpinner.dismiss();
+                crypto1 = AdbUtils.writeNewCryptoConfig(getFilesDir());
+                keygenSpinner.dismiss();
 
-                    if (crypto == null)
-                    {
-                        Dialog.displayDialog(MainActivity.this, "Key Pair Generation Failed",
-                                "Unable to generate and save RSA key pair",
-                                true);
-                        return;
-                    }
-
-                    Dialog.displayDialog(MainActivity.this, "New Key Pair Generated",
-                            "Devices running 4.2.2 will need to be plugged in to a computer the next time you connect to them",
-                            false);
+                if (crypto1 == null)
+                {
+                    Dialog.displayDialog(MainActivity.this, "Key Pair Generation Failed",
+                            "Unable to generate and save RSA key pair",
+                            true);
+                    return;
                 }
+
+                Dialog.displayDialog(MainActivity.this, "New Key Pair Generated",
+                        "Devices running 4.2.2 will need to be plugged in to a computer the next time you connect to them",
+                        false);
             }).start();
         }
     }
 
-    private void loadPreferences() {
+    private void setupListeners() {
+        connectButton.setOnClickListener(l -> connect());
+    }
+
+    private void initializeComponents() {
+        ipField = findViewById(R.id.ipAddressField);
+        portField = findViewById(R.id.portField);
+        connectButton = findViewById(R.id.connect);
+    }
+
+    public void loadPreferences() {
         SharedPreferences prefs = getSharedPreferences(PREFS_FILE, 0);
         ipField.setText(prefs.getString("IP", ""));
         portField.setText(prefs.getString("Port", "5555"));
     }
 
-    private void savePreferences() {
+    public void savePreferences() {
         SharedPreferences.Editor prefs = getSharedPreferences(PREFS_FILE, 0).edit();
         prefs.putString("IP", ipField.getText().toString());
         prefs.putString("Port", portField.getText().toString());
         prefs.apply();
     }
 
-    private void connect() {
+    public void connect() {
         Intent shellIntent = new Intent(this, AdbShell.class);
         int port;
 
