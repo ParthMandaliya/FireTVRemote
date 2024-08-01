@@ -9,4 +9,7 @@
     <string name="firetv_right">RIGHT</string>
     <string name="channel_name">Connection Info</string>
     <string name="firetv_ok">OK</string>
+    <string name="firetv_volume_down">Volume Down</string>
+    <string name="firetv_volume_up">Volume UP</string>
+    <string name="firetv_mute">Mute</string>
 </resources>

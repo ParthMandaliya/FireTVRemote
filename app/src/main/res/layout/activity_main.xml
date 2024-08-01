@@ -23,7 +23,7 @@
             android:layout_marginTop="14dp"
             android:ems="10"
             android:hint="@string/ip_address_hint"
-            android:inputType="text"
+            android:inputType="phone"
             android:nextFocusDown="@+id/portField"
             android:singleLine="true" />
 

@@ -29,6 +29,9 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     private Button leftButton = null;
     private Button rightButton = null;
     private Button okButton = null;
+    private Button volumeUpButton = null;
+    private Button volumeDownButton = null;
+    private Button volumeMuteButton = null;
 
     private Intent service = null;
     private ShellService.ShellServiceBinder binder = null;
@@ -107,6 +110,9 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         leftButton = (Button) findViewById(R.id.firetv_left);
         rightButton = (Button) findViewById(R.id.firetv_right);
         okButton = (Button) findViewById(R.id.firetv_ok);
+        volumeUpButton = (Button) findViewById(R.id.firetv_volup);
+        volumeDownButton = (Button) findViewById(R.id.firetv_voldown);
+        volumeMuteButton = (Button) findViewById(R.id.firetv_mute);
 
         upButton.setOnClickListener(l -> {
             upButtonPressed();
@@ -123,6 +129,15 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         okButton.setOnClickListener(l -> {
             okButtonPressed();
         });
+        volumeUpButton.setOnClickListener(l -> {
+            volumeUpButtonPressed();
+        });
+        volumeDownButton.setOnClickListener(l -> {
+            volumeDownButtonPressed();
+        });
+        volumeMuteButton.setOnClickListener(l -> {
+            volumeMuteButtonPressed();
+        });
 
         commandHistory = CommandHistory.loadCommandHistoryFromPrefs(MAX_COMMAND_HISTORY, this, PREFS_FILE);
         service = new Intent(this, ShellService.class);
@@ -130,23 +145,35 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     }
 
     private void upButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_UP));
+        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_UP));
     }
 
     private  void downButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_DOWN));
+        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_DOWN));
     }
 
     private void leftButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_LEFT));
+        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_LEFT));
     }
 
     private void rightButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_RIGHT));
+        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_RIGHT));
     }
 
     private void okButtonPressed() {
-        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_CENTER));
+        runCommand("input dpad keyevent " + Integer.toString(KeyEvents.KEYCODE_DPAD_CENTER));
+    }
+
+    private void volumeUpButtonPressed() {
+        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_VOLUME_UP));
+    }
+
+    private void volumeDownButtonPressed() {
+        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_VOLUME_DOWN));
+    }
+
+    private void volumeMuteButtonPressed() {
+        runCommand("input keyboard keyevent " + Integer.toString(KeyEvents.KEYCODE_VOLUME_MUTE));
     }
 
     public void runCommand(String cmd) {
