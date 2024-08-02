@@ -16,6 +16,7 @@ import com.cgutman.adblib.AdbCrypto;
 import com.firetvremote.ui.Dialog;
 import com.firetvremote.ui.SpinnerDialog;
 
+
 public class MainActivity extends AppCompatActivity {
 
     public Button connectButton = null;
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
                         "Devices running 4.2.2 will need to be plugged in to a computer the next time you connect to them",
                         false);
             }).start();
+        } else {
+            connect();
         }
     }
 
@@ -113,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         savePreferences();
-
         startActivity(shellIntent);
     }
 }

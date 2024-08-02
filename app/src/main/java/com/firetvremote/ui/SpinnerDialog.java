@@ -7,7 +7,7 @@ import android.content.DialogInterface.OnCancelListener;
 
 import java.util.ArrayList;
 
-public class SpinnerDialog implements Runnable,OnCancelListener {
+public class SpinnerDialog implements Runnable, OnCancelListener {
 	private String title, message;
 	private Activity activity;
 	private ProgressDialog progress;
