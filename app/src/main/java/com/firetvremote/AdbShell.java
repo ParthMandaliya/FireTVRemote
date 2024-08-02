@@ -32,6 +32,19 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     private Button volumeUpButton = null;
     private Button volumeDownButton = null;
     private Button volumeMuteButton = null;
+    private Button channelUpButton = null;
+    private Button channelDownButton = null;
+    private Button netflixButton = null;
+//    TODO: To be fixed: Open PrimeVideo
+    private Button primeVideoButton = null;
+//    TODO: To be fixed: Open YouTube
+    private Button youtubeButton = null;
+//    TODO: To be fixed: Open MiniTV
+    private Button tvButton = null;
+    private Button backButton = null;
+    private Button backwardButton = null;
+    private Button fastForwardButton = null;
+    private Button playPauseButton = null;
 
     private Intent service = null;
     private ShellService.ShellServiceBinder binder = null;
@@ -71,8 +84,6 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
             }
             return;
         }
-
-        setTitle("ADB Shell - "+hostName+":"+port);
 
         startForegroundService(service);
 
@@ -115,6 +126,16 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         volumeUpButton = findViewById(R.id.firetv_volup);
         volumeDownButton = findViewById(R.id.firetv_voldown);
         volumeMuteButton = findViewById(R.id.firetv_mute);
+        channelUpButton = findViewById(R.id.firetv_channel_up);
+        channelDownButton = findViewById(R.id.firetv_channel_down);
+        netflixButton = findViewById(R.id.firetv_netflix);
+        primeVideoButton = findViewById(R.id.firetv_primevideo);
+        youtubeButton = findViewById(R.id.firetv_youtube);
+        tvButton = findViewById(R.id.firetv_tv);
+        backButton = findViewById(R.id.firetv_back);
+        backwardButton = findViewById(R.id.firetv_backward);
+        playPauseButton = findViewById(R.id.firetv_play_pause);
+        fastForwardButton = findViewById(R.id.firetv_fast_forward);
     }
 
     private void setupListeners() {
@@ -126,6 +147,16 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         volumeUpButton.setOnClickListener(l -> runCommands.volumeUpButtonPressed(connection));
         volumeDownButton.setOnClickListener(l -> runCommands.volumeDownButtonPressed(connection));
         volumeMuteButton.setOnClickListener(l -> runCommands.volumeMuteButtonPressed(connection));
+        channelUpButton.setOnClickListener(l -> runCommands.channelUpButtonPressed(connection));
+        channelDownButton.setOnClickListener(l -> runCommands.channelDownButtonPressed(connection));
+        netflixButton.setOnClickListener(l -> runCommands.openNetFlix(connection));
+        primeVideoButton.setOnClickListener(l -> runCommands.openPrimeVideo(connection));
+        youtubeButton.setOnClickListener(l -> runCommands.openYouTube(connection));
+        tvButton.setOnClickListener(l -> runCommands.tvButtonPressed(connection));
+        backButton.setOnClickListener(l -> runCommands.backButtonPressed(connection));
+        backwardButton.setOnClickListener(l -> runCommands.stepBackWardButtonPressed(connection));
+        playPauseButton.setOnClickListener(l -> runCommands.playPauseButtonPressed(connection));
+        fastForwardButton.setOnClickListener(l -> runCommands.fastForwardButtonPressed(connection));
     }
 
     @NonNull

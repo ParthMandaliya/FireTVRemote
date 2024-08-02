@@ -22,7 +22,7 @@ public class DeviceConnection implements Closeable {
 	private final DeviceConnectionListener listener;
 	
 	private AdbConnection connection;
-	private AdbStream shellStream;
+	public static AdbStream shellStream;
 	
 	private boolean closed;
 	private boolean foreground;

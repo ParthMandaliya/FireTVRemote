@@ -12,4 +12,14 @@
     <string name="firetv_volume_down">Volume Down</string>
     <string name="firetv_volume_up">Volume UP</string>
     <string name="firetv_mute">Mute</string>
+    <string name="firetv_channel_up">Channel UP</string>
+    <string name="firetv_channel_down">Channel Down</string>
+    <string name="firetv_netflix">NetFlix</string>
+    <string name="firetv_prime_video">PrimeVideo</string>
+    <string name="firetv_youtube">YouTube</string>
+    <string name="firetv_minitv">MiniTV</string>
+    <string name="firetv_goback">Go Back</string>
+    <string name="firetv_backward">Backward</string>
+    <string name="firetv_play_pause">Play/Pause</string>
+    <string name="firetv_fast_forward">Fast Forward</string>
 </resources>
