@@ -59,24 +59,29 @@ public class RunCommands {
     }
 
     public boolean fastForwardButtonPressed(DeviceConnection connection, boolean longPressed) {
-        String command = "";
-        if (longPressed) {
-            command = "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD;
-        } else {
-            command = "input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD;
-        }
-        runCommand(connection,command);
+        if (longPressed)
+            runCommand(
+                connection,
+                "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD
+            );
+        else
+            runCommand(
+                connection,
+                "input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD
+            );
         return true;
     }
 
     public boolean stepBackWardButtonPressed(DeviceConnection connection, boolean longPressed) {
-        String command = "";
-        if (longPressed) {
-            command = "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_MEDIA_REWIND;
-        } else {
-            command = "input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_REWIND;
-        }
-        runCommand(connection, command);
+        if (longPressed)
+            runCommand(
+                connection,
+                "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_MEDIA_REWIND
+            );
+        else
+            runCommand(
+                connection, "input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_REWIND
+            );
         return true;
     }
 
