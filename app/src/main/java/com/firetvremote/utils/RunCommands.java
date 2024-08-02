@@ -50,10 +50,6 @@ public class RunCommands {
         runCommand(connection,"input keyboard keyevent " + KeyEvents.KEYCODE_CHANNEL_DOWN);
     }
 
-    public void tvButtonPressed(DeviceConnection connection) {
-        runCommand(connection,"input keyboard keyevent " + KeyEvents.KEYCODE_TV);
-    }
-
     public void backButtonPressed(DeviceConnection connection) {
         runCommand(connection,"input keyboard keyevent " + KeyEvents.KEYCODE_BACK);
     }
@@ -62,12 +58,26 @@ public class RunCommands {
         runCommand(connection,"input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_PLAY_PAUSE);
     }
 
-    public void fastForwardButtonPressed(DeviceConnection connection) {
-        runCommand(connection,"input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD);
+    public boolean fastForwardButtonPressed(DeviceConnection connection, boolean longPressed) {
+        String command = "";
+        if (longPressed) {
+            command = "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD;
+        } else {
+            command = "input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_FAST_FORWARD;
+        }
+        runCommand(connection,command);
+        return true;
     }
 
-    public void stepBackWardButtonPressed(DeviceConnection connection) {
-        runCommand(connection,"input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_REWIND);
+    public boolean stepBackWardButtonPressed(DeviceConnection connection, boolean longPressed) {
+        String command = "";
+        if (longPressed) {
+            command = "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_MEDIA_REWIND;
+        } else {
+            command = "input keyboard keyevent " + KeyEvents.KEYCODE_MEDIA_REWIND;
+        }
+        runCommand(connection, command);
+        return true;
     }
 
     public void openNetFlix(DeviceConnection connection) {
@@ -78,7 +88,17 @@ public class RunCommands {
 
     public void openPrimeVideo(DeviceConnection connection) {}
 
-    public void openYouTube(DeviceConnection connection) {}
+//    TODO: Check if app is installed if yes, then only launch the app
+    public void openYouTube(DeviceConnection connection) {
+//        if (isAppInstalled(connection, TVApps.YOUTUBE))
+        runCommand(connection,"am start -W " + TVApps.YOUTUBE);
+    }
+
+    public void tvButtonPressed(DeviceConnection connection) {
+        String packageName = TVApps.MINITV.split("/", 2)[0];
+        if (isAppInstalled(connection, packageName))
+            runCommand(connection,"am start -W " + TVApps.MINITV);
+    }
 
     private boolean isAppInstalled(DeviceConnection connection, String package_name) {
         try {

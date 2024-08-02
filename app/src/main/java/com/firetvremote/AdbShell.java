@@ -154,9 +154,11 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         youtubeButton.setOnClickListener(l -> runCommands.openYouTube(connection));
         tvButton.setOnClickListener(l -> runCommands.tvButtonPressed(connection));
         backButton.setOnClickListener(l -> runCommands.backButtonPressed(connection));
-        backwardButton.setOnClickListener(l -> runCommands.stepBackWardButtonPressed(connection));
+        backwardButton.setOnClickListener(l -> runCommands.stepBackWardButtonPressed(connection, false));
+        backwardButton.setOnLongClickListener(l -> runCommands.stepBackWardButtonPressed(connection, true));
         playPauseButton.setOnClickListener(l -> runCommands.playPauseButtonPressed(connection));
-        fastForwardButton.setOnClickListener(l -> runCommands.fastForwardButtonPressed(connection));
+        fastForwardButton.setOnClickListener(l -> runCommands.fastForwardButtonPressed(connection, false));
+        fastForwardButton.setOnLongClickListener(l -> runCommands.fastForwardButtonPressed(connection, true));
     }
 
     @NonNull
