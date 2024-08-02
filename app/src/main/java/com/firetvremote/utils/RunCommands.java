@@ -91,7 +91,11 @@ public class RunCommands {
             runCommand(connection,"am start -W " + TVApps.NETFLIX);
     }
 
-    public void openPrimeVideo(DeviceConnection connection) {}
+    public void openPrimeVideo(DeviceConnection connection) {
+        String packageName = TVApps.PRIMEVIDEO.split("/", 2)[0];
+        if (isAppInstalled(connection, packageName))
+            runCommand(connection,"am start -W " + TVApps.PRIMEVIDEO);
+    }
 
 //    TODO: Check if app is installed if yes, then only launch the app
     public void openYouTube(DeviceConnection connection) {
