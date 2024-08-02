@@ -19,9 +19,9 @@ import com.firetvremote.ui.SpinnerDialog;
 
 public class MainActivity extends AppCompatActivity {
 
-    public Button connectButton = null;
-    public EditText ipField = null;
-    public EditText portField = null;
+    private Button connectButton = null;
+    private EditText ipTextView = null;
+    private EditText portTextView = null;
 
     public SpinnerDialog keygenSpinner;
 
@@ -80,31 +80,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        ipField = findViewById(R.id.ipAddressField);
-        portField = findViewById(R.id.portField);
+        ipTextView = findViewById(R.id.firetv_up_address);
+        portTextView = findViewById(R.id.firetv_port);
         connectButton = findViewById(R.id.connect);
     }
 
     public void loadPreferences() {
         SharedPreferences prefs = getSharedPreferences(PREFS_FILE, 0);
-        ipField.setText(prefs.getString("IP", ""));
-        portField.setText(prefs.getString("Port", "5555"));
+        ipTextView.setText(prefs.getString("IP", ""));
+        portTextView.setText(prefs.getString("Port", "5555"));
     }
 
-    public void savePreferences() {
+    public void savePreferences(String ip, int port) {
         SharedPreferences.Editor prefs = getSharedPreferences(PREFS_FILE, 0).edit();
-        prefs.putString("IP", ipField.getText().toString());
-        prefs.putString("Port", portField.getText().toString());
+        prefs.putString("IP", ip);
+        prefs.putString("Port", String.valueOf(port));
         prefs.apply();
     }
 
     public void connect() {
         Intent shellIntent = new Intent(this, AdbShell.class);
-        int port;
 
-        shellIntent.putExtra("IP", ipField.getText().toString());
+        String ip = ipTextView.getText().toString().trim();
+        int port = Integer.parseInt(portTextView.getText().toString().trim());
+
+        shellIntent.putExtra("IP", ip);
         try {
-            port = Integer.parseInt(portField.getText().toString());
             if (port <= 0 || port > 65535) {
                 Dialog.displayDialog(this, "Invalid Port", "The port number must be between 1 and 65535", false);
                 return;
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        savePreferences();
+        savePreferences(ip, port);
         startActivity(shellIntent);
     }
 }

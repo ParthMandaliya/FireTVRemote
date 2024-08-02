@@ -7,11 +7,13 @@ import com.firetvremote.devconn.DeviceConnection;
 
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.IBinder;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
@@ -35,22 +37,26 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     private Button channelUpButton = null;
     private Button channelDownButton = null;
     private Button netflixButton = null;
-//    TODO: To be fixed: Open PrimeVideo
     private Button primeVideoButton = null;
-//    TODO: To be fixed: Open YouTube
     private Button youtubeButton = null;
-//    TODO: To be fixed: Open MiniTV
     private Button tvButton = null;
     private Button backButton = null;
     private Button backwardButton = null;
     private Button fastForwardButton = null;
     private Button playPauseButton = null;
+    private Button homeButton = null;
+    private Button optionsButton = null;
+    private Button appsButton = null;
+    private Button settingsButton = null;
+    private Button sleepButton = null;
+    private Button keyboardButton = null;
+    private Button wakeUpButton = null;
 
     private Intent service = null;
     private ShellService.ShellServiceBinder binder = null;
     private SpinnerDialog connectWaiting = null;
 
-    private DeviceConnection connection = null;
+    protected static DeviceConnection connection = null;
 
     private RunCommands runCommands = null;
 
@@ -136,6 +142,13 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         backwardButton = findViewById(R.id.firetv_backward);
         playPauseButton = findViewById(R.id.firetv_play_pause);
         fastForwardButton = findViewById(R.id.firetv_fast_forward);
+        homeButton = findViewById(R.id.firetv_home);
+        optionsButton = findViewById(R.id.firetv_options);
+        appsButton = findViewById(R.id.firetv_apps);
+        settingsButton = findViewById(R.id.firetv_settings);
+        sleepButton = findViewById(R.id.firetv_sleep);
+        keyboardButton = findViewById(R.id.firetv_keyboard);
+        wakeUpButton = findViewById(R.id.firetv_wakeup);
     }
 
     private void setupListeners() {
@@ -159,6 +172,19 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         playPauseButton.setOnClickListener(l -> runCommands.playPauseButtonPressed(connection));
         fastForwardButton.setOnClickListener(l -> runCommands.fastForwardButtonPressed(connection, false));
         fastForwardButton.setOnLongClickListener(l -> runCommands.fastForwardButtonPressed(connection, true));
+        homeButton.setOnClickListener(l -> runCommands.homeButtonPressed(connection, false));
+        homeButton.setOnLongClickListener(l -> runCommands.homeButtonPressed(connection, true));
+        optionsButton.setOnClickListener(l -> runCommands.optionsButtonPressed(connection));
+        appsButton.setOnClickListener(l -> runCommands.appsButtonPressed(connection));
+        settingsButton.setOnClickListener(l -> runCommands.settingsButtonPressed(connection));
+        sleepButton.setOnClickListener(l -> runCommands.sleepButtonPressed(connection));
+        keyboardButton.setOnClickListener(l -> keyboardButtonPressed());
+        wakeUpButton.setOnClickListener(l -> runCommands.wakeUpButtonPressed(connection));
+    }
+
+    private void keyboardButtonPressed() {
+        Intent showKeyboardLayout = new Intent(this, Search.class);
+        startActivity(showKeyboardLayout);
     }
 
     @NonNull

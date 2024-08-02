@@ -38,6 +38,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.firetvremote.MainActivity" />
         </activity>
+        <activity
+            android:name="com.firetvremote.Search"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:resizeableActivity="true"
+            android:parentActivityName="com.firetvremote.AdbShell" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.firetvremote.AdbShell" />
+        </activity>
         <service android:name="com.firetvremote.service.ShellService"
             android:foregroundServiceType="remoteMessaging" />
     </application>

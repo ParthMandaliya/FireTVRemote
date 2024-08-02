@@ -44,12 +44,16 @@ public class DeviceConnection implements Closeable {
 		return port;
 	}
 	
-	public boolean queueCommand(@NonNull String command) {
+	public void queueCommand(@NonNull String command) {
         /* Queue it up for sending to the device */
         commandQueue.add(command.getBytes(StandardCharsets.UTF_8));
-        return true;
-    }
-	
+	}
+
+	public void queueCommand(@NonNull byte[] command) {
+		/* Queue it up for sending to the device */
+		commandQueue.add(command);
+	}
+
 	public void startConnect() {
 		new Thread(() -> {
             boolean connected = false;

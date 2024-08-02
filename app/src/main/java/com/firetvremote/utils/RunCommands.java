@@ -1,6 +1,8 @@
 package com.firetvremote.utils;
 
 
+import android.view.inputmethod.InputMethodManager;
+
 import androidx.annotation.NonNull;
 
 import com.firetvremote.devconn.DeviceConnection;
@@ -97,16 +99,52 @@ public class RunCommands {
             runCommand(connection,"am start -W " + TVApps.PRIMEVIDEO);
     }
 
-//    TODO: Check if app is installed if yes, then only launch the app
     public void openYouTube(DeviceConnection connection) {
-//        if (isAppInstalled(connection, TVApps.YOUTUBE))
-        runCommand(connection,"am start -W " + TVApps.YOUTUBE);
+        if (isAppInstalled(connection, TVApps.YOUTUBE))
+            runCommand(connection,"am start -W " + TVApps.YOUTUBE);
     }
 
     public void tvButtonPressed(DeviceConnection connection) {
         String packageName = TVApps.MINITV.split("/", 2)[0];
         if (isAppInstalled(connection, packageName))
             runCommand(connection,"am start -W " + TVApps.MINITV);
+    }
+
+    public boolean homeButtonPressed(DeviceConnection connection, boolean longPressed) {
+        if (longPressed)
+            runCommand(connection, "input keyboard keyevent --longpress " + KeyEvents.KEYCODE_HOME);
+        else
+            runCommand(connection, "input keyboard keyevent " + KeyEvents.KEYCODE_HOME);
+        return true;
+    }
+
+    public void optionsButtonPressed(DeviceConnection connection) {
+        runCommand(connection, "input keyboard keyevent " + KeyEvents.KEYCODE_MENU);
+    }
+
+    public void settingsButtonPressed(DeviceConnection connection) {
+        runCommand(connection, "am start -W " + TVApps.SETTINGS);
+    }
+
+    public void appsButtonPressed(DeviceConnection connection) {
+        runCommand(connection, "am start -W " + TVApps.HOME);
+    }
+
+    public void sleepButtonPressed(DeviceConnection connection) {
+        runCommand(connection, "input keyboard keyevent " + KeyEvents.KEYCODE_SLEEP);
+    }
+
+    public void wakeUpButtonPressed(DeviceConnection connection) {
+        runCommand(connection,  "input keyboard keyevent " + KeyEvents.KEYCODE_WAKEUP);
+    }
+
+    public void searchButtonPressed(DeviceConnection connection, String searchTerm) {
+//        runCommand(connection, "input keyevent " + KeyEvents.KEYCODE_MOVE_END);
+//        runCommand(connection, "input keyevent $(printf 'KEYCODE_DEL' {1..250})");
+
+//        TODO: Figure out a way to clear the textbox remotely
+        runCommand(connection, "input keycombination 113 29 && input keyevent 67");
+        runCommand(connection, "input keyboard text " + searchTerm);
     }
 
     private boolean isAppInstalled(DeviceConnection connection, String package_name) {
@@ -120,5 +158,8 @@ public class RunCommands {
 
     public void runCommand(@NonNull DeviceConnection connection, String cmd) {
         connection.queueCommand(cmd+"\n");
+    }
+    public void runCommand(@NonNull DeviceConnection connection, byte[] cmd) {
+        connection.queueCommand(cmd);
     }
 }
