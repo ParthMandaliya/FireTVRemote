@@ -7,14 +7,13 @@ import com.firetvremote.devconn.DeviceConnection;
 
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.IBinder;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -23,6 +22,9 @@ import com.firetvremote.service.ShellService;
 import com.firetvremote.ui.Dialog;
 import com.firetvremote.ui.SpinnerDialog;
 import com.firetvremote.utils.RunCommands;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class AdbShell extends Activity implements DeviceConnectionListener {
 
@@ -51,6 +53,8 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
     private Button sleepButton = null;
     private Button keyboardButton = null;
     private Button wakeUpButton = null;
+    private Button headphoneButton = null;
+    private Button disconnectButton = null;
 
     private Intent service = null;
     private ShellService.ShellServiceBinder binder = null;
@@ -149,6 +153,8 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         sleepButton = findViewById(R.id.firetv_sleep);
         keyboardButton = findViewById(R.id.firetv_keyboard);
         wakeUpButton = findViewById(R.id.firetv_wakeup);
+        headphoneButton = findViewById(R.id.firetv_headphone);
+        disconnectButton = findViewById(R.id.firetv_disconnect);
     }
 
     private void setupListeners() {
@@ -180,6 +186,34 @@ public class AdbShell extends Activity implements DeviceConnectionListener {
         sleepButton.setOnClickListener(l -> runCommands.sleepButtonPressed(connection));
         keyboardButton.setOnClickListener(l -> keyboardButtonPressed());
         wakeUpButton.setOnClickListener(l -> runCommands.wakeUpButtonPressed(connection));
+        headphoneButton.setOnClickListener(l -> runCommands.headphoneButtonPressed(connection));
+        disconnectButton.setOnClickListener(l -> disconnectButtonPressed());
+
+        headphoneButton.setOnLongClickListener(l -> findProRemoteListener(connection));
+    }
+
+    public boolean findProRemoteListener(DeviceConnection connection) {
+        try {
+            runCommands.headphoneButtonPressed(connection);
+            String op = new String(DeviceConnection.shellStream.read(), StandardCharsets.UTF_8);
+            Toast.makeText(this, op, Toast.LENGTH_SHORT).show();
+        } catch (InterruptedException | IOException e) {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+
+    private void disconnectButtonPressed() {
+        new Thread(() -> {
+            connection.close();
+        }).start();
+
+        AdbUtils.deleteCryptoConfigFiles(getFilesDir());
+        Intent parentActivityIntent = getParentActivityIntent();
+        if (parentActivityIntent != null) {
+            startActivity(parentActivityIntent);
+            finish();
+        }
     }
 
     private void keyboardButtonPressed() {

@@ -31,4 +31,9 @@
     <string name="firetv_wake_up">Wake</string>
     <string name="firetv_enter_text_here">Enter Text Here</string>
     <string name="firetv_send">Send</string>
+    <string name="firetv_headphone">Headphone</string>
+    <string name="firetv_disconnect">Disconnect</string>
+    <string name="firetv_step_1">Step 1:</string>
+    <string name="firetv_step_1_setup_instructions">Click on Find Listener button to\nfind Amazon Pro Remote device</string>
+    <string name="firetv_find_device">Find Device</string>
 </resources>

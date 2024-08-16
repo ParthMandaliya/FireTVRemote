@@ -6,6 +6,7 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 
 import com.firetvremote.devconn.DeviceConnection;
+import com.firetvremote.ui.Dialog;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -141,10 +142,20 @@ public class RunCommands {
     public void searchButtonPressed(DeviceConnection connection, String searchTerm) {
 //        runCommand(connection, "input keyevent " + KeyEvents.KEYCODE_MOVE_END);
 //        runCommand(connection, "input keyevent $(printf 'KEYCODE_DEL' {1..250})");
+//        runCommand(connection, new byte[]{0x03});
 
 //        TODO: Figure out a way to clear the textbox remotely
-        runCommand(connection, "input keycombination 113 29 && input keyevent 67");
+//        runCommand(connection, "input keycombination 113 29 && input keyevent 67");
         runCommand(connection, "input keyboard text " + searchTerm);
+    }
+
+    public void headphoneButtonPressed(DeviceConnection connection) {
+        runCommand(
+                connection, "sendevent /dev/input/event5 1 640 1 &&" +
+                        "sendevent /dev/input/event5 0 0 0 && " +
+                        "sendevent /dev/input/event5 1 640 0 && " +
+                        "sendevent /dev/input/event5 0 0 0"
+        );
     }
 
     private boolean isAppInstalled(DeviceConnection connection, String package_name) {

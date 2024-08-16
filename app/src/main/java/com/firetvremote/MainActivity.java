@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +44,9 @@ public class MainActivity extends AppCompatActivity {
         setupListeners();
 
         loadPreferences();
+    }
 
+    private void generatePublicPrivateKeys() {
         AdbCrypto crypto = AdbUtils.readCryptoConfig(getFilesDir());
         if (crypto == null) {
             /* We need to make a new pair */
@@ -70,8 +73,6 @@ public class MainActivity extends AppCompatActivity {
                         "Devices running 4.2.2 will need to be plugged in to a computer the next time you connect to them",
                         false);
             }).start();
-        } else {
-            connect();
         }
     }
 
@@ -99,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect() {
+        generatePublicPrivateKeys();
+
         Intent shellIntent = new Intent(this, AdbShell.class);
 
         String ip = ipTextView.getText().toString().trim();

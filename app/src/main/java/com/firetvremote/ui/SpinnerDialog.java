@@ -15,8 +15,7 @@ public class SpinnerDialog implements Runnable, OnCancelListener {
 	
 	private static ArrayList<SpinnerDialog> rundownDialogs = new ArrayList<SpinnerDialog>();
 	
-	public SpinnerDialog(Activity activity, String title, String message, boolean finish)
-	{
+	public SpinnerDialog(Activity activity, String title, String message, boolean finish) {
 		this.activity = activity;
 		this.title = title;
 		this.message = message;
@@ -24,23 +23,21 @@ public class SpinnerDialog implements Runnable, OnCancelListener {
 		this.finish = finish;
 	}
 	
-	public static SpinnerDialog displayDialog(Activity activity, String title, String message, boolean finish)
-	{
+	public static SpinnerDialog displayDialog(
+		Activity activity, String title, String message, boolean finish
+	) {
 		SpinnerDialog spinner = new SpinnerDialog(activity, title, message, finish);
 		activity.runOnUiThread(spinner);
 		return spinner;
 	}
 	
-	public static void closeDialogs()
-	{
+	public static void closeDialogs() {
 		for (SpinnerDialog d : rundownDialogs)
 			d.progress.dismiss();
-		
 		rundownDialogs.clear();
 	}
 	
-	public void dismiss()
-	{
+	public void dismiss() {
 		// Running again with progress != null will destroy it
 		activity.runOnUiThread(this);
 	}
@@ -48,8 +45,7 @@ public class SpinnerDialog implements Runnable, OnCancelListener {
 	@Override
 	public void run() {
 		
-		if (progress == null)
-		{
+		if (progress == null) {
 			// If we're dying, don't bother creating a dialog
 			if (activity.isFinishing())
 				return;

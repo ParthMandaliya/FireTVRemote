@@ -39,7 +39,12 @@ public class AdbUtils {
 
 		return crypto;
 	}
-	
+
+	public static void deleteCryptoConfigFiles(File dataDir) {
+		new File(dataDir, PUBLIC_KEY_NAME).delete();
+		new File(dataDir, PRIVATE_KEY_NAME).delete();
+	}
+
 	public static boolean safeClose(Closeable c) {
 		if (c == null)
 			return false;
